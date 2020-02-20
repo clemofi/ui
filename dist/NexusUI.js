@@ -88,21 +88,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var math = _interopRequire(__webpack_require__(5));
 	
-	var Rack = _interopRequire(__webpack_require__(37));
+	var Rack = _interopRequire(__webpack_require__(40));
 	
-	var Tune = _interopRequire(__webpack_require__(39));
+	var Tune = _interopRequire(__webpack_require__(42));
 	
-	var Transform = _interopRequireWildcard(__webpack_require__(38));
+	var Transform = _interopRequireWildcard(__webpack_require__(41));
 	
-	var Counter = __webpack_require__(28);
-	var Radio = __webpack_require__(40);
-	var Drunk = __webpack_require__(27);
-	var Sequence = __webpack_require__(26);
-	var Matrix = __webpack_require__(25);
+	var Counter = __webpack_require__(29);
+	var Radio = __webpack_require__(43);
+	var Drunk = __webpack_require__(28);
+	var Sequence = __webpack_require__(27);
+	var Matrix = __webpack_require__(26);
 	
-	var WAAClock = _interopRequire(__webpack_require__(41));
+	var WAAClock = _interopRequire(__webpack_require__(44));
 	
-	var Interval = _interopRequire(__webpack_require__(44));
+	var Interval = _interopRequire(__webpack_require__(30));
 	
 	/**
 	NexusUI => created as Nexus
@@ -231,19 +231,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	  Button: __webpack_require__(16),
 	  TextButton: __webpack_require__(18),
 	  RadioButton: __webpack_require__(19),
-	  Number: __webpack_require__(20),
-	  Select: __webpack_require__(21),
-	  Dial: __webpack_require__(22),
-	  Piano: __webpack_require__(23),
-	  Sequencer: __webpack_require__(24),
-	  Pan2D: __webpack_require__(29),
-	  Tilt: __webpack_require__(30),
-	  Multislider: __webpack_require__(31),
-	  Pan: __webpack_require__(32),
-	  Envelope: __webpack_require__(33),
-	  Spectrogram: __webpack_require__(34),
-	  Meter: __webpack_require__(35),
-	  Oscilloscope: __webpack_require__(36)
+	  Label: __webpack_require__(20),
+	  Number: __webpack_require__(21),
+	  Select: __webpack_require__(22),
+	  Dial: __webpack_require__(23),
+	  Piano: __webpack_require__(24),
+	  Sequencer: __webpack_require__(25),
+	  Pan2D: __webpack_require__(31),
+	  PanBinaural: __webpack_require__(32),
+	  Tilt: __webpack_require__(33),
+	  Multislider: __webpack_require__(34),
+	  Pan: __webpack_require__(35),
+	  Envelope: __webpack_require__(36),
+	  Spectrogram: __webpack_require__(37),
+	  Meter: __webpack_require__(38),
+	  Oscilloscope: __webpack_require__(39)
 	};
 
 /***/ }),
@@ -2226,6 +2228,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.render();
 	      }
 	    },
+	    passiveUpdate: {
+	      value: function passiveUpdate(v) {
+	        this._value.update(v);
+	        this.position.value = this._value.normalized;
+	        this.emit("changeSilent", this._value.value);
+	        this.render();
+	      }
+	    },
 	    min: {
 	
 	      /**
@@ -3240,6 +3250,199 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
 	
 	var Interface = __webpack_require__(6);
+	
+	/**
+	* TextButton
+	*
+	* @description Text button
+	*
+	* @demo <span nexus-ui="textButton"></span>
+	*
+	* @example
+	* var textbutton = new Nexus.TextButton('#target')
+	*
+	* @example
+	* var textbutton = new Nexus.TextButton('#target',{
+	*     'size': [150,50],
+	*     'state': false,
+	*     'text': 'Play',
+	*     'alternateText': 'Stop'
+	* })
+	*
+	* @output
+	* change
+	* Fires any time the interface's value changes. <br>
+	* The event data is a <i>string</i> of the text on the button at the moment it was clicked.
+	*
+	* @outputexample
+	* textbutton.on('change',function(v) {
+	*   console.log(v);
+	* })
+	*
+	*/
+	
+	var Label = (function (_Interface) {
+	  function Label() {
+	    _classCallCheck(this, Label);
+	
+	    var options = ["value"];
+	
+	    var defaults = {
+	      size: [150, 50],
+	      state: false,
+	      text: "Play"
+	    };
+	
+	    _get(Object.getPrototypeOf(Label.prototype), "constructor", this).call(this, arguments, options, defaults);
+	
+	    this._text = this.settings.text;
+	
+	    if (this.settings.color) {
+	      this.textColor = this.settings.color;
+	    }
+	    if (this.settings.bgColor) {
+	      this.bgColor = this.settings.bgColor;
+	    }
+	
+	    if (this.settings.alternate) {
+	      //TODO: Remove this conditional in a breaking-changes release
+	      this.settings.alternateText = this.settings.alternate;
+	      console.warn("'alternate' initiator is deprecated. Use 'alternateText' instead.");
+	    }
+	    this._alternateText = this.settings.alternateText;
+	    this.mode = this.settings.alternateText ? "toggle" : "button";
+	    this.init();
+	    this.render();
+	
+	    this.state = this.settings.state;
+	  }
+	
+	  _inherits(Label, _Interface);
+	
+	  _createClass(Label, {
+	    buildFrame: {
+	      value: function buildFrame() {
+	
+	        this.element = document.createElement("div");
+	        this.parent.appendChild(this.element);
+	
+	        this.textElement = document.createElement("div");
+	        this.textElement.innerHTML = this._text;
+	        this.element.appendChild(this.textElement);
+	      }
+	    },
+	    buildInterface: {
+	      value: function buildInterface() {}
+	    },
+	    colorInterface: {
+	      value: function colorInterface() {
+	        this.element.style.color = this.colors.dark;
+	        this.render();
+	      }
+	    },
+	    sizeInterface: {
+	      value: function sizeInterface() {
+	        var textsize = this.height / 3;
+	        var textsize2 = this.width / (this._text.length + 2);
+	        textsize = Math.min(textsize, textsize2);
+	        if (this.alternateText) {
+	          var textsize3 = this.width / (this.alternateText.length + 2);
+	          textsize = Math.min(textsize, textsize3);
+	        }
+	        var styles = "width: " + this.width + "px;";
+	        styles += "height: " + this.height + "px;";
+	        styles += "padding: " + (this.height - textsize) / 2 + "px 0px;";
+	        styles += "box-sizing: border-box;";
+	        styles += "text-align: center;";
+	        styles += "font-family: inherit;";
+	        styles += "font-weight: 700;";
+	        styles += "opacity: 1;";
+	        styles += "font-size:" + textsize + "px;";
+	        this.textElement.style.cssText = styles;
+	        this.render();
+	      }
+	    },
+	    finalTouches: {
+	      value: function finalTouches() {}
+	    },
+	    render: {
+	      value: function render() {
+	        if (!this.state) {
+	          // this.element.style.backgroundColor = this.colors.fill;
+	          if (this.bgColor) {
+	            this.element.style.backgroundColor = this.bgColor;
+	          }
+	
+	          this.textElement.style.color = this.textColor ? this.textColor : this.colors.dark;
+	          this.textElement.innerHTML = this._text;
+	        } else {
+	          // this.element.style.backgroundColor = this.colors.accent;
+	          if (this.alternateText) {
+	            this.textElement.innerHTML = this._alternateText;
+	          } else {
+	            this.textElement.innerHTML = this._text;
+	          }
+	        }
+	      }
+	    },
+	    alternateText: {
+	
+	      /**
+	      The text to display when the button is in its "on" state. If set, this puts the button in "toggle" mode.
+	      @type {String}
+	      */
+	
+	      get: function () {
+	        return this._alternateText;
+	      },
+	      set: function (text) {
+	        if (text) {
+	          this.mode = "toggle";
+	        } else {
+	          this.mode = "button";
+	        }
+	        this._alternateText = text;
+	        this.render();
+	      }
+	    },
+	    text: {
+	
+	      /**
+	      The text to display. (If .alternateText exists, then this .text will only be displayed when the button is in its "off" state.)
+	      @type {String}
+	      */
+	
+	      get: function () {
+	        return this._text;
+	      },
+	      set: function (text) {
+	        this._text = text;
+	        this.sizeInterface();
+	        this.render();
+	      }
+	    }
+	  });
+	
+	  return Label;
+	})(Interface);
+	
+	module.exports = Label;
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var Interface = __webpack_require__(6);
 	var Step = __webpack_require__(11);
 	var math = __webpack_require__(5);
 	
@@ -3440,6 +3643,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        destination.on("change", function (v) {
 	          _this.passiveUpdate(v);
 	        });
+	        destination.on("changeSilent", function (v) {
+	          _this.passiveUpdate(v);
+	        });
 	        this.on("change", function (v) {
 	          destination.value = v;
 	        });
@@ -3530,7 +3736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Number;
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3735,7 +3941,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Select;
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -3999,7 +4205,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            angle += Math.PI * 2;
 	          }
 	
-	          if (this.mode === "relative") {
+	          if (this.mode === "relative" && this.interaction === "radial") {
 	            if (this.previousAngle !== false && Math.abs(this.previousAngle - angle) > 2) {
 	              if (this.previousAngle > 3) {
 	                angle = Math.PI * 2;
@@ -4064,6 +4270,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._value.update(v);
 	        this.position.value = this._value.normalized;
 	        this.emit("change", this._value.value);
+	        this.render();
+	      }
+	    },
+	    passiveUpdate: {
+	      value: function passiveUpdate(v) {
+	        this._value.update(v);
+	        this.position.value = this._value.normalized;
+	        this.emit("changeSilent", this._value.value);
 	        this.render();
 	      }
 	    },
@@ -4151,7 +4365,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Dial;
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -4604,7 +4818,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	// loop through and render the keys?
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -4621,8 +4835,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	var dom = __webpack_require__(7);
 	var Interface = __webpack_require__(6);
 	var ButtonTemplate = __webpack_require__(17);
-	var MatrixModel = __webpack_require__(25);
-	var CounterModel = __webpack_require__(28);
+	var MatrixModel = __webpack_require__(26);
+	var CounterModel = __webpack_require__(29);
+	var Interval = __webpack_require__(30);
 	var touch = __webpack_require__(9);
 	
 	var MatrixCell = (function (_ButtonTemplate) {
@@ -4818,7 +5033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    * The interval object which controls timing and sequence scheduling.
 	    * @type {interval}
 	    */
-	    this.interval = new Nexus.Interval(200, function () {}, false); // jshint ignore:line
+	    this.interval = new Interval(200, function () {}, false); // jshint ignore:line
 	
 	    /**
 	    * A Matrix model containing methods for manipulating the sequencer's array of values. To learn how to manipulate the matrix, read about the matrix model.
@@ -5097,7 +5312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Sequencer;
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -5110,7 +5325,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var math = _interopRequire(__webpack_require__(5));
 	
-	var Sequence = _interopRequire(__webpack_require__(26));
+	var Sequence = _interopRequire(__webpack_require__(27));
 	
 	// For the tutorial, looking at
 	
@@ -5474,7 +5689,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Matrix;
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -5487,7 +5702,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var math = _interopRequire(__webpack_require__(5));
 	
-	var Drunk = _interopRequire(__webpack_require__(27));
+	var Drunk = _interopRequire(__webpack_require__(28));
 	
 	var Sequence = (function () {
 	  function Sequence() {
@@ -5600,7 +5815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Sequence;
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -5660,7 +5875,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Drunk;
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -5673,7 +5888,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var math = _interopRequire(__webpack_require__(5));
 	
-	var Drunk = _interopRequire(__webpack_require__(27));
+	var Drunk = _interopRequire(__webpack_require__(28));
 	
 	var Counter = (function () {
 	    function Counter() {
@@ -5770,7 +5985,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Counter;
 
 /***/ }),
-/* 29 */
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var clock = __webpack_require__(1).clock;
+	
+	var Interval = (function () {
+	  function Interval(rate, func, on) {
+	    _classCallCheck(this, Interval);
+	
+	    this.rate = rate;
+	    this.on = on;
+	    this.clock = clock(); // jshint ignore:line
+	
+	    this.pattern = [1];
+	    this.index = 0;
+	
+	    this.event = func ? func : function () {};
+	
+	    if (this.on) {
+	      this.start();
+	    }
+	  }
+	
+	  _createClass(Interval, {
+	    _event: {
+	      value: function _event(e) {
+	        //  if (this.pattern[this.index%this.pattern.length]) {
+	        this.event(e);
+	        //  }
+	        this.index++;
+	      }
+	    },
+	    stop: {
+	      value: function stop() {
+	        this.on = false;
+	        this.interval.clear();
+	      }
+	    },
+	    start: {
+	      value: function start() {
+	        this.on = true;
+	        this.interval = this.clock.callbackAtTime(this._event.bind(this), this.clock.context.currentTime).repeat(this.rate / 1000).tolerance({ early: 0.1, late: 1 });
+	      }
+	    },
+	    ms: {
+	      value: function ms(newrate) {
+	        if (this.on) {
+	          var ratio = newrate / this.rate;
+	          this.rate = newrate;
+	          this.clock.timeStretch(this.clock.context.currentTime, [this.interval], ratio);
+	        } else {
+	          this.rate = newrate;
+	        }
+	      }
+	    }
+	  });
+	
+	  return Interval;
+	})();
+	
+	module.exports = Interval;
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6067,7 +6351,524 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Pan2D;
 
 /***/ }),
-/* 30 */
+/* 32 */
+/***/ (function(module, exports, __webpack_require__) {
+
+	"use strict";
+	
+	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
+	
+	var _get = function get(object, property, receiver) { var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc && desc.writable) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+	
+	var _inherits = function (subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) subClass.__proto__ = superClass; };
+	
+	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
+	
+	var svg = __webpack_require__(4);
+	// let math = require('../util/math');
+	var Interface = __webpack_require__(6);
+	// let Step = require('../models/step');
+	// import * as Interaction from '../util/interaction';
+	
+	/**
+	* PanBinaural
+	*
+	* @description Interface for placing a sound around a virtual head and sending the data to a binaural synthesis engine. An unlimited number of sources can be generated. The Interface calculates the distance and the angle for each source relative to the head and returns it as a numeric value.
+	*
+	* @demo <span nexus-ui="panbinaural"></span>
+	*
+	* @example
+	* var panbinaural = new Nexus.PanBinaural('#target')
+	*
+	* @example
+	* var panbinaural = new Nexus.PanBinaural('#target',{
+	*   'size': [200,200]
+	* })
+	*
+	* @output
+	* change
+	* Fires any time the "source" node's position changes. <br>
+	* The event data output varies, depending on the transmit-mode setting. With the default transmit-mode setting (the value of 1), the values will only be output for the point that is being interacted with. For transmit-mode 0, it will output the values of all points.
+	* The data is an object containing either two arrays (transmit-mode == 0) holding distance and angle for each point, or two values (transmit-mode == 1) with distance and angle of the current point. With transmit-mode 1 it also contains the index of the current point.
+	*
+	* @outputexample
+	* panbinaural.on('change',function(v) {
+	*   console.log(v);
+	* })
+	*
+	*/
+	
+	var Point = function Point(x, y, label, colorIndex) {
+	  _classCallCheck(this, Point);
+	
+	  this.x = x;
+	  this.y = y;
+	  this.label = label;
+	  this.colorIndex = colorIndex;
+	};
+	
+	var PanBinaural = (function (_Interface) {
+	  function PanBinaural() {
+	    _classCallCheck(this, PanBinaural);
+	
+	    var options = ["range"];
+	
+	    var defaults = {
+	      size: [700, 700],
+	      mode: "absolute"
+	    };
+	
+	    _get(Object.getPrototypeOf(PanBinaural.prototype), "constructor", this).call(this, arguments, options, defaults);
+	
+	    // for choosing the right point to move
+	    this.activePoint = undefined;
+	
+	    // determines which color is applied to newly generated points
+	    this.currentColorIndex = 0;
+	
+	    // width in pixels for scale (how many pixels are 1 meter)
+	    this.meterScale = 100;
+	
+	    // val is an array containing all the points on the canvas.
+	    this.val = [];
+	
+	    this.circleCenterX = this.width / 2;
+	    this.circleCenterY = this.height / 2;
+	
+	    this.listenerPoint = new Point(this.circleCenterX, this.circleCenterY, "Listener", 0);
+	
+	    // radius for background circle
+	    this.bgRadius = Math.min(this.circleCenterX, this.circleCenterY) - 50;
+	
+	    // Size of touch node graphic.
+	    this.nodeSize = 30;
+	    // different size for main point
+	    this.nodeSizeMain = this.nodeSize * 1.5;
+	
+	    this.activeBorderColor = "#000";
+	    this.customColors = ["#845ec2", "#d65db1", "#ff6f91", "#ff9671", "#ffc75f", "#f9f871", "#2f4858", "#2e6775"];
+	
+	    // defines what is sent in the transmit function (actually in the processToTransmit function)
+	    // 0 : send all information on points
+	    // 1 : send information of current active point only
+	    this.transmitMode = 1;
+	
+	    // set the head orientation relative to the zero degree axis (on top)
+	    this.headOrientation = 0;
+	    // calculate the angles relative to the head or to the zero degree axis
+	    this.angleRelativeToHead = false;
+	
+	    // defines if it is possible to edit points with clicking
+	    this.clickable = true;
+	
+	    // defines if it is possible to create new points with clicking
+	    this.newPointsGeneratable = true;
+	
+	    this.init();
+	
+	    this.render();
+	  }
+	
+	  _inherits(PanBinaural, _Interface);
+	
+	  _createClass(PanBinaural, {
+	    buildInterface: {
+	      value: function buildInterface() {
+	
+	        this.backgroundCircle = svg.create("circle");
+	
+	        this.element.appendChild(this.backgroundCircle);
+	
+	        this.listener = svg.create("circle");
+	
+	        this.element.appendChild(this.listener);
+	
+	        this.sourceElements = [];
+	        this.labelElements = [];
+	      }
+	    },
+	    sizeInterface: {
+	      value: function sizeInterface() {
+	        this.backgroundCircle.setAttribute("cx", this.circleCenterX);
+	        this.backgroundCircle.setAttribute("cy", this.circleCenterY);
+	        this.backgroundCircle.setAttribute("r", this.bgRadius);
+	        this._minDimension = Math.min(this.width, this.height);
+	
+	        this.listener.setAttribute("cx", this.circleCenterX);
+	        this.listener.setAttribute("cy", this.circleCenterY);
+	
+	        this.listener.setAttribute("r", this.nodeSizeMain);
+	
+	        this.render();
+	      }
+	    },
+	    colorInterface: {
+	      value: function colorInterface() {
+	        this.backgroundCircle.setAttribute("fill", this.colors.fill);
+	
+	        this.listener.setAttribute("fill", this.colors.mediumLight);
+	      }
+	    },
+	    render: {
+	      value: function render() {}
+	    },
+	    click: {
+	      value: function click() {
+	
+	        if (this.clickable) {
+	
+	          this.setActivePoint(this.mouse.x, this.mouse.y);
+	          if (this.newPointsGeneratable) {
+	            if (this.activePoint == undefined) {
+	
+	              this.generateNewPoint(this.mouse.x, this.mouse.y, "Point " + (this.val.length + 1), this.currentColorIndex);
+	            }
+	          }
+	
+	          this.scaleNode();
+	
+	          this.processToTransmit();
+	
+	          this.move();
+	        }
+	      }
+	    },
+	    move: {
+	      value: function move() {
+	        if (this.clickable) {
+	
+	          if (this.clicked) {
+	            if (this.activePoint != undefined) {
+	              this.val[this.activePoint].x = this.mouse.x;
+	              this.val[this.activePoint].y = this.mouse.y;
+	
+	              this.scaleNode();
+	
+	              this.drawEmphasisCircle();
+	
+	              this.sourceElements[this.activePoint].setAttribute("cx", this.val[this.activePoint].x);
+	              this.sourceElements[this.activePoint].setAttribute("cy", this.val[this.activePoint].y);
+	
+	              this.labelElements[this.activePoint].setAttribute("x", this.val[this.activePoint].x);
+	              this.labelElements[this.activePoint].setAttribute("y", this.val[this.activePoint].y + this.nodeSize + 20);
+	            }
+	
+	            this.processToTransmit();
+	            this.render();
+	          }
+	        }
+	      }
+	    },
+	    release: {
+	      value: function release() {
+	        if (this.clickable) {
+	          this.scaleNode();
+	          this.processToTransmit();
+	          this.render();
+	        }
+	      }
+	    },
+	    normalized: {
+	      get: function () {
+	        return {
+	          x: this.value.x.normalized,
+	          y: this.value.y.normalized
+	        };
+	      }
+	    },
+	    addNewPoint: {
+	      value: function addNewPoint(distance, angle, label, colorIndex) {
+	
+	        // adapt angle to head
+	        angle -= 90;
+	
+	        if (angle >= 360) {
+	          angle -= 360;
+	        }
+	
+	        var tempPoint = this.polToCar(distance, angle);
+	
+	        tempPoint.x = this.convertToPixels(tempPoint.x);
+	        tempPoint.y = this.convertToPixels(tempPoint.y);
+	
+	        // translate
+	        tempPoint.x += this.circleCenterX;
+	        tempPoint.y += this.circleCenterY;
+	
+	        this.generateNewPoint(tempPoint.x, tempPoint.y, label, colorIndex);
+	
+	        this.drawEmphasisCircle();
+	      }
+	    },
+	    moveExistingPoint: {
+	      value: function moveExistingPoint(pointIndex, distance, angle) {
+	
+	        // adapt angle to head
+	        angle -= 90;
+	
+	        if (angle >= 360) {
+	          angle -= 360;
+	        }
+	
+	        var newCoordinates = this.polToCar(distance, angle);
+	
+	        newCoordinates.x = this.convertToPixels(newCoordinates.x);
+	        newCoordinates.y = this.convertToPixels(newCoordinates.y);
+	
+	        // translate
+	        newCoordinates.x += this.circleCenterX;
+	        newCoordinates.y += this.circleCenterY;
+	
+	        this.val[pointIndex].x = newCoordinates.x;
+	        this.val[pointIndex].y = newCoordinates.y;
+	
+	        this.sourceElements[pointIndex].setAttribute("cx", this.val[pointIndex].x);
+	        this.sourceElements[pointIndex].setAttribute("cy", this.val[pointIndex].y);
+	
+	        this.labelElements[pointIndex].setAttribute("x", this.val[pointIndex].x);
+	        this.labelElements[pointIndex].setAttribute("y", this.val[pointIndex].y + this.nodeSize + 20);
+	
+	        this.scaleNode();
+	      }
+	    },
+	    changeColorIndexOfActivePoint: {
+	      value: function changeColorIndexOfActivePoint(colorIndex) {
+	        if (this.activePoint != undefined) {
+	          this.val[this.activePoint].colorIndex = colorIndex;
+	          this.sourceElements[this.activePoint].setAttribute("fill", this.customColors[colorIndex]);
+	        }
+	      }
+	    },
+	    generateNewPoint: {
+	      value: function generateNewPoint(x, y, label, colorIndex) {
+	        this.val.push(new Point(x, y, label, colorIndex));
+	
+	        this.setActivePoint(x, y);
+	        this.scaleNode();
+	
+	        var sourceElement = svg.create("circle");
+	
+	        sourceElement.setAttribute("cx", this.val[this.activePoint].x);
+	        sourceElement.setAttribute("cy", this.val[this.activePoint].y);
+	        sourceElement.setAttribute("r", this.nodeSize);
+	        sourceElement.setAttribute("fill-opacity", "0.5");
+	        sourceElement.setAttribute("fill", this.customColors[colorIndex]);
+	        sourceElement.setAttribute("stroke", "none");
+	
+	        var labelElement = svg.create("text");
+	        labelElement.setAttribute("x", this.val[this.activePoint].x);
+	        labelElement.setAttribute("y", this.val[this.activePoint].y + this.nodeSize + 20);
+	        labelElement.setAttribute("fill", "black");
+	        labelElement.setAttribute("text-anchor", "middle");
+	        labelElement.textContent = this.val[this.activePoint].label;
+	
+	        this.element.appendChild(sourceElement);
+	        this.element.appendChild(labelElement);
+	
+	        this.sourceElements.push(sourceElement);
+	        this.labelElements.push(labelElement);
+	      }
+	    },
+	    setActivePoint: {
+	      value: function setActivePoint(x, y) {
+	        var temp;
+	        for (var i = 0; i < this.val.length; i++) {
+	          var maxX = undefined,
+	              maxY = undefined,
+	              minX = undefined,
+	              minY = undefined;
+	
+	          maxX = this.val[i].x + this.nodeSize;
+	          minX = this.val[i].x - this.nodeSize;
+	
+	          maxY = this.val[i].y + this.nodeSize;
+	          minY = this.val[i].y - this.nodeSize;
+	
+	          if (x <= maxX && x >= minX && y <= maxY && y >= minY) {
+	            temp = i;
+	          }
+	        }
+	        this.activePoint = temp;
+	      }
+	    },
+	    drawEmphasisCircle: {
+	      value: function drawEmphasisCircle() {
+	        this.sourceElements[this.activePoint].setAttribute("stroke", this.activeBorderColor);
+	        for (var i = 0; i < this.sourceElements.length; i++) {
+	          if (i != this.activePoint) {
+	            this.sourceElements[i].setAttribute("stroke", "none");
+	            // console.log('in here');
+	          }
+	        }
+	      }
+	    },
+	    scaleNode: {
+	      value: function scaleNode() {
+	        if (this.activePoint != undefined) {
+	          var clippedX = this.val[this.activePoint].x;
+	          var clippedY = this.val[this.activePoint].y;
+	
+	          var distquad = (clippedX - this.circleCenterX) * (clippedX - this.circleCenterX) + (clippedY - this.circleCenterY) * (clippedY - this.circleCenterY);
+	
+	          if (distquad > this.bgRadius * this.bgRadius) {
+	
+	            var realX = this.val[this.activePoint].x - this.circleCenterX;
+	            var realY = this.val[this.activePoint].y - this.circleCenterY;
+	
+	            var angle = Math.atan2(realY, realX);
+	
+	            clippedX = this.bgRadius * Math.cos(angle);
+	            clippedY = this.bgRadius * Math.sin(angle);
+	
+	            // translate
+	            clippedX += this.circleCenterX;
+	            clippedY += this.circleCenterY;
+	          }
+	
+	          this.val[this.activePoint].x = clippedX;
+	          this.val[this.activePoint].y = clippedY;
+	        }
+	      }
+	    },
+	    processToTransmit: {
+	      value: function processToTransmit() {
+	        var transmitData;
+	        if (this.transmitMode == 0) {
+	
+	          // calculate distances and angles
+	          var distances = [];
+	          var angles = [];
+	
+	          for (var i = 0; i < this.val.length; i++) {
+	            distances.push(this.calculateDistance(this.listenerPoint, this.val[i]));
+	            angles.push(this.calculateAngle(this.val[i]));
+	          }
+	
+	          transmitData = {
+	            angles: angles,
+	            distances: distances
+	          };
+	        } else if (this.transmitMode == 1) {
+	          if (this.activePoint != undefined) {
+	            var distance = this.calculateDistance(this.listenerPoint, this.val[this.activePoint]);
+	            var angle = this.calculateAngle(this.val[this.activePoint]);
+	
+	            transmitData = {
+	              pointIndex: this.activePoint,
+	              angle: angle,
+	              distance: distance
+	            };
+	          } else {
+	            return;
+	          }
+	        }
+	        this.transmit(transmitData);
+	      }
+	    },
+	    removeActivePoint: {
+	      value: function removeActivePoint() {
+	        if (this.activePoint != undefined) {
+	
+	          this.sourceElements[this.activePoint].remove();
+	          this.sourceElements.splice(this.activePoint, 1);
+	
+	          this.labelElements[this.activePoint].remove();
+	          this.labelElements.splice(this.activePoint, 1);
+	
+	          this.val.splice(this.activePoint, 1);
+	          this.activePoint = undefined;
+	        }
+	      }
+	    },
+	    removeAllPoints: {
+	      value: function removeAllPoints() {
+	        var numberOfPoints = this.val.length;
+	        for (var i = 0; i < numberOfPoints; i++) {
+	          this.val.splice(0, 1);
+	          this.sourceElements[0].remove();
+	          this.sourceElements.splice(0, 1);
+	
+	          this.labelElements[0].remove();
+	          this.labelElements.splice(0, 1);
+	        }
+	        this.activePoint = undefined;
+	      }
+	    },
+	    convertToMeters: {
+	      value: function convertToMeters(pixels) {
+	        var meters = pixels / this.meterScale;
+	        return meters;
+	      }
+	    },
+	    convertToPixels: {
+	      value: function convertToPixels(meters) {
+	        var pixels = meters * this.meterScale;
+	        return pixels;
+	      }
+	    },
+	    polToCar: {
+	      value: function polToCar(distance, angleDeg) {
+	        var angleRad = angleDeg / 180 * Math.PI;
+	
+	        var newX = distance * Math.cos(angleRad);
+	        var newY = distance * Math.sin(angleRad);
+	
+	        return {
+	          x: newX,
+	          y: newY
+	        };
+	      }
+	    },
+	    calculateDistance: {
+	      value: function calculateDistance(pointA, pointB) {
+	        var distX = pointB.x - pointA.x;
+	        var distY = pointB.y - pointA.y;
+	        var lengthInPx = Math.sqrt(distX * distX + distY * distY);
+	        var lengthInM = this.convertToMeters(lengthInPx);
+	        return lengthInM;
+	      }
+	    },
+	    calculateAngle: {
+	      value: function calculateAngle(pointXY) {
+	        var realX = pointXY.x - this.circleCenterX;
+	        var realY = pointXY.y - this.circleCenterY;
+	
+	        var angle = Math.atan2(realY, realX) * 180 / Math.PI;
+	
+	        if (angle < 0) {
+	          angle += 360;
+	        }
+	
+	        angle += 90;
+	
+	        if (angle >= 360) {
+	          angle -= 360;
+	        }
+	
+	        if (this.angleRelativeToHead) {
+	          // adapt to head
+	          angle -= this.headOrientation;
+	          if (angle < 0) {
+	            angle += 360;
+	          }
+	        }
+	        return angle;
+	      }
+	    },
+	    transmit: {
+	      value: function transmit(transmitData) {
+	        this.emit("change", transmitData);
+	      }
+	    }
+	  });
+	
+	  return PanBinaural;
+	})(Interface);
+	
+	module.exports = PanBinaural;
+
+/***/ }),
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6376,7 +7177,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Tilt;
 
 /***/ }),
-/* 31 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6862,7 +7663,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Multislider;
 
 /***/ }),
-/* 32 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7112,7 +7913,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Pan;
 
 /***/ }),
-/* 33 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7631,7 +8432,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Envelope;
 
 /***/ }),
-/* 34 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7797,7 +8598,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Spectrogram;
 
 /***/ }),
-/* 35 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -8014,7 +8815,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Meter;
 
 /***/ }),
-/* 36 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -8193,7 +8994,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Oscilloscope;
 
 /***/ }),
-/* 37 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -8244,7 +9045,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	*/
 	
-	var transform = _interopRequireWildcard(__webpack_require__(38));
+	var transform = _interopRequireWildcard(__webpack_require__(41));
 	
 	var dom = _interopRequire(__webpack_require__(7));
 	
@@ -8399,7 +9200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Rack;
 
 /***/ }),
-/* 38 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -8493,6 +9294,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    target.style.width = options.size[0] + "px";
 	    target.style.height = options.size[1] + "px";
 	  }
+	  if (options.x != undefined || options.y != undefined) {
+	    target.style.position = "absolute";
+	  }
+	  if (options.x != undefined) {
+	    target.style.left = options.x + "px";
+	  }
+	  if (options.y != undefined) {
+	    target.style.top = options.y + "px";
+	  }
 	  return element(target, type, options);
 	};
 	
@@ -8501,7 +9311,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	exports.add = add;
 
 /***/ }),
-/* 39 */
+/* 42 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -8709,7 +9519,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Tune;
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, exports) {
 
 	"use strict";
@@ -8835,17 +9645,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Radio;
 
 /***/ }),
-/* 41 */
+/* 44 */
 /***/ (function(module, exports, __webpack_require__) {
 
-	var WAAClock = __webpack_require__(42)
+	var WAAClock = __webpack_require__(45)
 	
 	module.exports = WAAClock
 	if (typeof window !== 'undefined') window.WAAClock = WAAClock
 
 
 /***/ }),
-/* 42 */
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(process) {var isBrowser = (typeof window !== 'undefined')
@@ -9082,10 +9892,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	WAAClock.prototype._relTime = function(absTime) {
 	  return absTime - this.context.currentTime
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(43)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(46)))
 
 /***/ }),
-/* 43 */
+/* 46 */
 /***/ (function(module, exports) {
 
 	// shim for using process in browser
@@ -9273,75 +10083,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	process.umask = function() { return 0; };
 
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-	"use strict";
-	
-	var _createClass = (function () { function defineProperties(target, props) { for (var key in props) { var prop = props[key]; prop.configurable = true; if (prop.value) prop.writable = true; } Object.defineProperties(target, props); } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; })();
-	
-	var _classCallCheck = function (instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } };
-	
-	var clock = __webpack_require__(1).clock;
-	
-	var Interval = (function () {
-	  function Interval(rate, func, on) {
-	    _classCallCheck(this, Interval);
-	
-	    this.rate = rate;
-	    this.on = on;
-	    this.clock = clock(); // jshint ignore:line
-	
-	    this.pattern = [1];
-	    this.index = 0;
-	
-	    this.event = func ? func : function () {};
-	
-	    if (this.on) {
-	      this.start();
-	    }
-	  }
-	
-	  _createClass(Interval, {
-	    _event: {
-	      value: function _event(e) {
-	        //  if (this.pattern[this.index%this.pattern.length]) {
-	        this.event(e);
-	        //  }
-	        this.index++;
-	      }
-	    },
-	    stop: {
-	      value: function stop() {
-	        this.on = false;
-	        this.interval.clear();
-	      }
-	    },
-	    start: {
-	      value: function start() {
-	        this.on = true;
-	        this.interval = this.clock.callbackAtTime(this._event.bind(this), this.clock.context.currentTime).repeat(this.rate / 1000).tolerance({ early: 0.1, late: 1 });
-	      }
-	    },
-	    ms: {
-	      value: function ms(newrate) {
-	        if (this.on) {
-	          var ratio = newrate / this.rate;
-	          this.rate = newrate;
-	          this.clock.timeStretch(this.clock.context.currentTime, [this.interval], ratio);
-	        } else {
-	          this.rate = newrate;
-	        }
-	      }
-	    }
-	  });
-	
-	  return Interval;
-	})();
-	
-	module.exports = Interval;
 
 /***/ })
 /******/ ])
