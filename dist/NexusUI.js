@@ -2443,6 +2443,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this.render();
 	      }
 	    },
+	    passiveUpdate: {
+	      value: function passiveUpdate(value) {
+	        this._state.flip(value);
+	        this.emit("changeSilent", this.state);
+	        this.render();
+	      }
+	    },
 	    flip: {
 	
 	      /**
